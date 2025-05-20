@@ -1,0 +1,9 @@
+tasks:
+  format:
+    type: test
+    description: 'Runs prettier with the --write flag. Requires argumenting the root location/base url.'
+    command: 'prettier --write'
+    args: '.'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'

@@ -1,0 +1,20 @@
+tasks:
+  dev:
+    type: run
+    preset: watcher
+    description: 'Runs nest build with the --watch flag.'
+    command: 'nest start --watch --path ./tsconfig.build.json'
+    local: true
+    deps:
+      - '^:build'
+  build:
+    type: build
+    description: 'Runs nest build'
+    command: 'nest build --path ./tsconfig.build.json'
+    deps:
+      - '^:build'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - '@group(outputs)'

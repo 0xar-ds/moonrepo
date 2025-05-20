@@ -1,0 +1,12 @@
+tasks:
+  lint:
+    type: test
+    description: 'Runs eslint with the --fix and --cache flag. Requires argumenting the root location/base url.'
+    command: 'eslint --fix --cache'
+    args:
+      - '"{src,test}/**/*.ts"'
+    inputs:
+      - '@group(sources)'
+      - '@group(tests)'
+    outputs:
+      - '.eslintcache'

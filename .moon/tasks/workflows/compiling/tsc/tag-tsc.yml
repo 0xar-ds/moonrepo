@@ -1,0 +1,18 @@
+tasks:
+  dev:
+    type: run
+    preset: watcher
+    description: 'Runs tsc with build configuration on watch mode.'
+    local: true
+    command: 'tsc --project ./tsconfig.build.json --watch'
+  build:
+    type: build
+    description: 'Runs tsc with the build configuration.'
+    command: 'tsc --project ./tsconfig.build.json'
+    deps:
+      - '^:build'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - '@group(outputs)'

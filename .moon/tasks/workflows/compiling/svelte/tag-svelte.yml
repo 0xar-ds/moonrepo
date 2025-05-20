@@ -1,0 +1,53 @@
+tasks:
+  # Run the development server
+  dev:
+    type: run
+    preset: watcher
+    description: 'Runs vite dev'
+    command: 'vite dev'
+    local: true
+    deps:
+      - '^:build'
+
+  # Build the application
+  build:
+    type: build
+    description: 'Runs vite build'
+    command: 'vite build'
+    deps:
+      - '^:build'
+    inputs:
+      - '@group(configs)'
+      - '@group(sources)'
+    outputs:
+      - '@group(outputs)'
+
+  sync:
+    type: test
+    description: 'Runs svelte-kit sync'
+    command: 'svelte-kit sync'
+    options:
+      internal: true
+
+  # Run the typechecker
+  check:
+    type: test
+    description: 'Runs svelte check'
+    command: 'svelte-check --tsconfig ./tsconfig.json'
+    local: true
+    deps:
+      - 'sync'
+    inputs:
+      - '@group(configs)'
+      - '@group(sources)'
+      - '@group(tests)'
+
+  # Preview the built application
+  preview:
+    type: run
+    preset: watcher
+    description: 'Builds and previews the project'
+    command: 'vite preview'
+    local: true
+    deps:
+      - 'build'

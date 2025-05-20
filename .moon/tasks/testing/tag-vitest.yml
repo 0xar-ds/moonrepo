@@ -1,0 +1,14 @@
+implicitDeps:
+  - '^:build'
+
+tasks:
+  test:
+    type: test
+    description: 'Runs vitest. Assumes project has Vitest configured.'
+    command: 'vitest --run'
+  test/watch:
+    type: test
+    preset: watcher
+    description: 'Runs vitest with the --watch flag. Assumes project has Vitest configured.'
+    local: true
+    command: 'vitest watch'
