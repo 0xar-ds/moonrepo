@@ -1,0 +1,33 @@
+{
+  // "$schema": "https://json.schemastore.org/tsconfig.json",
+  "compilerOptions": {
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    "composite": true,
+    "sourceMap": true,
+    "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // "noEmitOnError": true,
+    "removeComments": true,
+
+    "strict": true,
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictPropertyInitialization": true,
+    "forceConsistentCasingInFileNames": true,
+    "noPropertyAccessFromIndexSignature": true
+  }
+}

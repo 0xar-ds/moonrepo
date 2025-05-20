@@ -1,0 +1,9 @@
+node:
+  version: '23.0.0'
+  packageManager: 'pnpm'
+  pnpm: {}
+
+typescript:
+  syncProjectReferences: true
+  # syncProjectReferencesToPaths: true
+  # includeProjectReferenceSources: true

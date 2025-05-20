@@ -1,0 +1,15 @@
+# editors
+.vscode
+
+# moon
+.moon/cache
+.moon/docker
+
+# Ignore files for PNPM
+pnpm-lock.yaml
+
+# runtime artifacts
+node_modules
+
+# compiletime artifacts
+tsconfig.tsbuildinfo
