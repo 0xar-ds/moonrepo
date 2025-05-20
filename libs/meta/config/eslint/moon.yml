@@ -1,0 +1,7 @@
+type: configuration
+language: javascript
+stack: systems
+
+project:
+  name: 'libs/meta/config/eslint'
+  description: 'Hosts eslint configuration for generic projects.'
