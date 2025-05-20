@@ -1,0 +1,21 @@
+import type { JestConfigWithTsJest } from 'ts-jest';
+
+const config: JestConfigWithTsJest = {
+	rootDir: '.',
+
+	displayName: '{{ name | kebab_case }}',
+
+	testEnvironment: 'node',
+	testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
+	transform: {
+		'^.+\\.[tj]s$': [
+			'ts-jest',
+			{ useESM: true, tsconfig: './tsconfig.spec.json' },
+		],
+	},
+	extensionsToTreatAsEsm: ['.ts'],
+	moduleFileExtensions: ['js', 'json', 'ts'],
+	moduleNameMapper: { '(.+)\\.js': '$1' },
+};
+
+export default config;

@@ -1,0 +1,30 @@
+# https://moonrepo.dev/docs/config/template
+$schema: '../../.moon/cache/schemas/template.json'
+
+title: 'Base TypeScript Nest library'
+description: |
+  Scaffolds the initial structure for a nest library,
+  including source and test folders, a package.json, and more.
+variables:
+  description:
+    type: string
+    default: 'COQRS library'
+    required: true
+    prompt: 'Moon description?'
+  domain:
+    type: 'string'
+    default: 'libs'
+    required: true
+    prompt: 'Domain/resource scope?'
+  package_name:
+    type: string
+    default: '@libs/nest-library'
+    required: true
+    prompt: 'Package name?'
+  name:
+    type: 'string'
+    default: 'nest-library'
+    required: true
+    prompt: 'Project name?'
+
+destination: '[domain | lower_case]/[name | kebab_case]'

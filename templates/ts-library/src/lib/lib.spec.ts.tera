@@ -1,0 +1,17 @@
+import { hello } from './lib.js';
+
+describe('MainEntry', () => {
+	let value: typeof hello;
+
+	beforeEach(async () => {
+		value = hello;
+	});
+
+	it('hello should have a value of type string', () => {
+		expect(typeof value).toBe('string');
+	});
+
+	it('should equal the constant value assigned to it', () => {
+		expect(value).toBe('{{ name }}');
+	});
+});

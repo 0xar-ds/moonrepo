@@ -1,0 +1,13 @@
+type: library
+language: typescript
+stack: backend
+tags:
+  - 'jest'
+  - 'nest'
+  - 'eslint'
+  - 'prettier'
+  - 'code-quality'
+
+project:
+  name: '{{ domain | lower_case }}/{{ name | kebab_case }}'
+  description: '{{ description }}'
