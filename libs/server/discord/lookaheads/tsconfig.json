@@ -1,0 +1,20 @@
+{
+	"extends": "../../../../tsconfig.options.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"allowJs": false,
+		"checkJs": false,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true
+	},
+	"include": [],
+	"references": [
+		{
+			"path": "./tsconfig.build.json"
+		},
+	]
+}
