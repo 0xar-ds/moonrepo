@@ -1,0 +1,12 @@
+type: library
+language: typescript
+stack: backend
+tags:
+  - 'nest'
+  - 'eslint'
+  - 'prettier'
+  - 'code-quality'
+
+project:
+  name: 'libs/server/config/schemas'
+  description: 'Schemas abstraction for Server Config Modules'
