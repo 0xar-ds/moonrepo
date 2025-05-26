@@ -1,30 +1,25 @@
 import {
-	ArrayNotEmpty,
 	IsArray,
 	IsNumberString,
 	IsString,
-	IsUrl,
+	ValidateNested,
 } from 'class-validator';
-import { Snowflake } from 'discord.js';
+import { TicketPanelSchema } from './ticket-panel.schema.js';
+import { Type } from 'class-transformer';
 
 export class ServerApplicationSchema {
-	@IsNumberString()
-	public readonly tickets_channel!: string;
-
-	@IsNumberString()
-	public readonly announcement_channel!: string;
-
-	@IsUrl()
-	public readonly panel_banner_url!: string;
-
 	@IsArray()
-	@ArrayNotEmpty()
-	@IsString({ each: true })
-	public readonly notification_roles!: Snowflake[];
+	@ValidateNested({ each: true })
+	@Type(() => TicketPanelSchema)
+	public readonly tickets!: TicketPanelSchema[];
 
 	@IsString()
 	public readonly token!: string;
 
 	@IsNumberString()
 	public readonly guild!: string;
+
+	public getPanelSchemaByParentId(id: string) {
+		return this.tickets.find((schema) => schema.associated_channel_id === id);
+	}
 }

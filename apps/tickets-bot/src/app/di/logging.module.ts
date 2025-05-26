@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { OgmaModule, OgmaModuleOptions } from '@ogma/nestjs-module';
+
 import { ServerConfigSchema } from '../config/server-config.schema.js';
 
 @Module({

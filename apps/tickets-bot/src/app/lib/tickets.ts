@@ -4,10 +4,11 @@ export enum TicketKind {
 	Complaint = 'Queja',
 	Suggestion = 'Sugerencia',
 	Request = 'Solicitud',
+	Application = 'Postulación',
 }
 
 export const TicketKindRegex = new RegExp(
-	/(?<kind>Reporte|Consulta|Queja|Sugerencia|Solicitud)/,
+	/(?<kind>Reporte|Consulta|Queja|Sugerencia|Solicitud|Postulación)/,
 );
 
 export function getKind(v: string): TicketKind {
@@ -41,5 +42,10 @@ export const TicketKindToSpeechMap: Record<TicketKind, TicketKindSpeech> = {
 	[TicketKind.Request]: {
 		label: 'Presentar una solicitud',
 		description: '¿Necesitas que se te dé algún rol o se te ayude con algo?',
+	},
+	[TicketKind.Application]: {
+		label: 'Aplicación al Staff',
+		description:
+			'¿Querés iniciarte en el equipo de moderación de la comunidad?',
 	},
 };
