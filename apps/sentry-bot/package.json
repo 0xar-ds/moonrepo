@@ -13,40 +13,40 @@
 		"format": "prettier --write .",
 		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
 	},
-  "imports": {
-    "#root/*": {
-      "types": "./src/*",
-      "default": "./dist/src/*"
-    },
-    "#lib/*": {
-      "types": "./src/lib/*",
-      "default": "./dist/src/lib/*"
-    },
-    "#config/*": {
-      "types": "./src/config/*",
-      "default": "./dist/src/config/*"
-    },
-    "#app/*": {
-      "types": "./src/app/*",
-      "default": "./dist/src/app/*"
-    },
-    "#guards/*": {
-      "types": "./src/app/api/gateway/guards/*",
-      "default": "./dist/src/app/api/gateway/guards/*"
-    },
-    "#services/*": {
-      "types": "./src/app/api/gateway/services/*",
-      "default": "./dist/src/app/api/gateway/services/*"
-    },
-    "#controllers/*": {
-      "types": "./src/app/api/gateway/controllers/*",
-      "default": "./dist/src/app/api/gateway/controllers/*"
-    },
-    "#exception-filters/*": {
-      "types": "./src/app/api/gateway/exception-filters/*",
-      "default": "./dist/src/app/api/gateway/exception-filters/*"
-    }
-  },
+	"imports": {
+		"#root/*": {
+			"types": "./src/*",
+			"default": "./dist/src/*"
+		},
+		"#lib/*": {
+			"types": "./src/lib/*",
+			"default": "./dist/src/lib/*"
+		},
+		"#config/*": {
+			"types": "./src/config/*",
+			"default": "./dist/src/config/*"
+		},
+		"#app/*": {
+			"types": "./src/app/*",
+			"default": "./dist/src/app/*"
+		},
+		"#guards/*": {
+			"types": "./src/app/api/gateway/guards/*",
+			"default": "./dist/src/app/api/gateway/guards/*"
+		},
+		"#services/*": {
+			"types": "./src/app/api/gateway/services/*",
+			"default": "./dist/src/app/api/gateway/services/*"
+		},
+		"#controllers/*": {
+			"types": "./src/app/api/gateway/controllers/*",
+			"default": "./dist/src/app/api/gateway/controllers/*"
+		},
+		"#exception-filters/*": {
+			"types": "./src/app/api/gateway/exception-filters/*",
+			"default": "./dist/src/app/api/gateway/exception-filters/*"
+		}
+	},
 	"dependencies": {
 		"@nestjs/common": "^11.1.1",
 		"@nestjs/core": "^11.1.1",

@@ -11,16 +11,16 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"paths": {
-      "#root/*": ["src/*"],
+			"#root/*": ["src/*"],
 
 			"#app/*": ["src/app/*"],
-      "#guards/*": ["src/app/api/gateway/guards/*"],
-      "#services/*": ["src/app/api/gateway/services/*"],
-      "#controllers/*": ["src/app/api/gateway/controllers/*"],
-      "#exception-filters/*": ["src/app/api/gateway/exception-filters/*"],
+			"#guards/*": ["src/app/api/gateway/guards/*"],
+			"#services/*": ["src/app/api/gateway/services/*"],
+			"#controllers/*": ["src/app/api/gateway/controllers/*"],
+			"#exception-filters/*": ["src/app/api/gateway/exception-filters/*"],
 
 			"#config/*": ["src/config/*"],
-			"#lib/*": ["src/lib/*"],
+			"#lib/*": ["src/lib/*"]
 		}
 	},
 	"references": [
