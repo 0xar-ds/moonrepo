@@ -1,0 +1,34 @@
+{
+	"extends": "../../tsconfig.options.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"allowJs": false,
+		"checkJs": false,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"paths": {
+      "#root/*": ["src/*"],
+
+			"#app/*": ["src/app/*"],
+      "#guards/*": ["src/app/api/gateway/guards/*"],
+      "#services/*": ["src/app/api/gateway/services/*"],
+      "#controllers/*": ["src/app/api/gateway/controllers/*"],
+      "#exception-filters/*": ["src/app/api/gateway/exception-filters/*"],
+
+			"#config/*": ["src/config/*"],
+			"#lib/*": ["src/lib/*"],
+		}
+	},
+	"references": [
+		{
+			"path": "./tsconfig.build.json"
+		},
+		{
+			"path": "../../libs/server/config/schemas"
+		}
+	]
+}

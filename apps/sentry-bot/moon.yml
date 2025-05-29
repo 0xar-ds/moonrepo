@@ -1,0 +1,14 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+type: application
+language: typescript
+stack: backend
+tags:
+  - 'nest'
+  - 'eslint'
+  - 'prettier'
+  - 'code-quality'
+
+project:
+  name: 'apps/sentry-bot'
+  description: 'In-discord sentry bot.'
