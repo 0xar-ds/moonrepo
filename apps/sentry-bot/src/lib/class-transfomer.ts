@@ -1,6 +1,6 @@
-import type { TransformFnParams } from 'class-transformer';
-
 import { Collection } from 'discord.js';
+
+import type { TransformFnParams } from 'class-transformer';
 
 import type { CustomizationDefinition } from './customization/customization.js';
 

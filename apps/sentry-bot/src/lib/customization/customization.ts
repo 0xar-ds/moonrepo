@@ -1,3 +1,19 @@
+import {
+	ColorCustomizationService,
+	CountryCustomizationService,
+	GenderCustomizationService,
+	NotificationCustomizationService,
+} from '#services/index.js';
+
+import { ColorChoices, ColorDefinition } from './kind/colors.js';
+import { CountryChoices, CountryDefinition } from './kind/countries.js';
+import { GenderChoices, GenderDefinition } from './kind/genders.js';
+
+import {
+	NotificationChoices,
+	NotificationDefinition,
+} from './kind/notifications.js';
+
 import type {
 	Collection,
 	SelectMenuComponentOptionData,
@@ -10,21 +26,6 @@ import type {
 	GendersCustomizationSchema,
 	NotificationsCustomizationSchema,
 } from '#config/schema/features/index.js';
-
-import {
-	ColorCustomizationService,
-	CountryCustomizationService,
-	GenderCustomizationService,
-	NotificationCustomizationService,
-} from '#services/index.js';
-
-import { ColorChoices, ColorDefinition } from './kind/colors.js';
-import { GenderChoices, GenderDefinition } from './kind/genders.js';
-import { CountryChoices, CountryDefinition } from './kind/countries.js';
-import {
-	NotificationChoices,
-	NotificationDefinition,
-} from './kind/notifications.js';
 
 export enum CustomizationKind {
 	Color = 'color',

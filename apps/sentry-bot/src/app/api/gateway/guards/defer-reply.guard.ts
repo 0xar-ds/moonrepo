@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { MessageFlags } from 'discord.js';
-
 import { NecordExecutionContext } from 'necord';
 
 @Injectable()
@@ -11,7 +10,11 @@ export class DeferReplyGuard implements CanActivate {
 
 			const [interaction] = necord.getContext<'interactionCreate'>();
 
-			if (interaction.isButton() || interaction.isStringSelectMenu())
+			if (
+				interaction.isButton() ||
+				interaction.isStringSelectMenu() ||
+				interaction.isChatInputCommand()
+			)
 				try {
 					await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 

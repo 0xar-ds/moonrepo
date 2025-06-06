@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-
 import { ChatInputCommandInteraction } from 'discord.js';
 import { Context, SlashCommand } from 'necord';
 
 import { ColorsCustomizationSchema } from '#config/schema/features/index.js';
-
+import { CustomizationKind } from '#lib/customization/customization.js';
 import { Messages } from '#lib/ui/messages.js';
-import { CustomizationKind } from '#root/lib/customization/customization.js';
 
 @Injectable()
 export class SetupCustomizationFeaturesController {

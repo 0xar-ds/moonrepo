@@ -1,38 +1,31 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
-
 import { OgmaModule } from '@ogma/nestjs-module';
-
 import { IntentsBitField } from 'discord.js';
 import { NecordModule, NecordModuleOptions } from 'necord';
 
 import { ServerConfigSchema } from '#config/server-config.schema.js';
-
-import { DiscordExceptionFilter } from '#exception-filters/necord.exception-filter.js';
-
-import { OnboardingController } from '#controllers/onboarding/members.controller.js';
-
 import { CustomizationController } from '#controllers/customization/customization.controller.js';
 import { SetupCustomizationFeaturesController } from '#controllers/customization/setup-customization-interfaces.controller.js';
+import { OnboardingController } from '#controllers/onboarding/members.controller.js';
+import { DiscordExceptionFilter } from '#exception-filters/necord.exception-filter.js';
 
 import {
-	DiscordGatewayService,
+	ChannelsGatewayService,
 	ColorCustomizationService,
+	CountryCustomizationService,
 	GenderCustomizationService,
-} from '#services/index.js';
-
-import {
+	GuildGatewayService,
+	NotificationCustomizationService,
 	OnboardingDecisionService,
 	OnboardingNotificationService,
-} from '#services/onboarding/index.js';
-
-import {
-	CountryCustomizationService,
-	NotificationCustomizationService,
-} from '#services/customization/index.js';
+	RolesGatewayService,
+} from '#services/index.js';
 
 const PROVIDERS = [
-	DiscordGatewayService,
+	GuildGatewayService,
+	RolesGatewayService,
+	ChannelsGatewayService,
 	OnboardingDecisionService,
 	OnboardingNotificationService,
 	OnboardingController,

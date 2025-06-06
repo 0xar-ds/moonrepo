@@ -1,6 +1,5 @@
-import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
-
+import { NestFactory } from '@nestjs/core';
 import { OgmaService } from '@ogma/nestjs-module';
 
 import { RootModule } from './di/root.module.js';

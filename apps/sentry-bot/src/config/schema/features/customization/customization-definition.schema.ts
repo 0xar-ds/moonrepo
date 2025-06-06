@@ -1,25 +1,25 @@
 import { Type } from 'class-transformer';
 
 import {
-	IsOptional,
-	IsString,
 	IsBoolean,
 	IsNumberString,
-	ValidatorConstraint,
-	ValidatorConstraintInterface,
+	IsOptional,
+	IsString,
 	registerDecorator,
-	ValidationOptions,
 	validateSync,
 	ValidationError,
+	ValidationOptions,
+	ValidatorConstraint,
+	ValidatorConstraintInterface,
 } from 'class-validator';
+
+import { CustomizationDefinition } from '#lib/customization/index.js';
 
 import type {
 	APIMessageComponentEmoji,
 	ComponentEmojiResolvable,
 	Snowflake,
 } from 'discord.js';
-
-import { CustomizationDefinition } from '#lib/customization/index.js';
 
 class APIMessageComponentEmojiClass implements APIMessageComponentEmoji {
 	@IsOptional()

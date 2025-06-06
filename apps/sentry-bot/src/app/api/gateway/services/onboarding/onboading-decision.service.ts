@@ -1,115 +1,175 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
+import { style } from '@ogma/styler';
 
 import {
 	ChannelType,
-	GuildBasedChannel,
+	Collection,
 	GuildMember,
 	PermissionsBitField,
-	TextBasedChannel,
 	TextChannel,
 	VoiceChannel,
 } from 'discord.js';
 
-import { OnboardingFeatureApplicationSchema } from '#config/schema/features/index.js';
+import { firstValueFrom, map, Observable, shareReplay, tap } from 'rxjs';
 
+import { OnboardingFeatureApplicationSchema } from '#config/schema/features/index.js';
+import { isChannelOfType } from '#lib/channel-type.js';
 import { Exception } from '#lib/exception.js';
 
-import { DiscordGatewayService } from '#services/index.js';
+import { ChannelsGatewayService } from '../gateway/channels-gateway.service.js';
 
 @Injectable()
 export class OnboardingDecisionService {
-	private lastPick: (GuildBasedChannel & TextBasedChannel) | null = null;
+	private readonly voices$: Observable<Collection<string, VoiceChannel>>;
+
+	public get voices() {
+		return this.voices$;
+	}
+
+	private readonly texts$: Observable<Collection<string, TextChannel>>;
+
+	public get texts() {
+		return this.texts$;
+	}
 
 	constructor(
 		@OgmaLogger(OnboardingDecisionService) private readonly logger: OgmaService,
 
-		private readonly context: DiscordGatewayService,
+		@Inject(OnboardingFeatureApplicationSchema)
 		private readonly config: OnboardingFeatureApplicationSchema,
-	) {}
 
-	async pickWelcomingChannel(member: GuildMember) {
-		this.logger.info(
-			`Fetching a random onboarding text channnel for user ${member.user.username} (${member.user.id})...`,
+		@Inject(ChannelsGatewayService)
+		private readonly gateway: ChannelsGatewayService,
+	) {
+		this.voices$ = this.gateway.channels.pipe(
+			tap((channels) =>
+				this.logger.verbose(
+					style.bYellow.apply(`Filtering ${channels.size} voice channels...`),
+				),
+			),
+
+			map((channels) =>
+				channels
+					.filter((v) => isChannelOfType(v, ChannelType.GuildVoice))
+					.filter(
+						(channel) =>
+							channel.members.size > 0 &&
+							(channel.userLimit === 0 ||
+								channel.userLimit > channel.members.size) &&
+							channel
+								.permissionsFor(channel.guild.roles.everyone)
+								.has(PermissionsBitField.Flags.ViewChannel) &&
+							channel
+								.permissionsFor(channel.guild.roles.everyone)
+								.has(PermissionsBitField.Flags.Connect),
+					),
+			),
+
+			tap((channels) =>
+				this.logger.verbose(
+					style.bGreen.apply(
+						`Filtered to ${channels.size} applicable voice channels.`,
+					),
+				),
+			),
+
+			shareReplay({ refCount: false, bufferSize: 1 }),
 		);
 
-		const lounges = this.config.lounges;
+		this.texts$ = this.gateway.channels.pipe(
+			tap((channels) =>
+				this.logger.verbose(
+					style.bYellow.apply(`Filtering ${channels.size} text channels...`),
+				),
+			),
 
-		if (lounges.length <= 0) {
-			this.logger.error('The application was configured to have no lounges.');
+			map((channels) =>
+				channels.filter((v) => isChannelOfType(v, ChannelType.GuildText)),
+			),
+			map((channels) =>
+				channels.filter(
+					(channel) =>
+						channel.parentId === this.config.notification_category &&
+						channel.name.startsWith(
+							this.config.notification_channel_name_match,
+						) &&
+						!this.config.notification_channel_ids_excluded.some(
+							(id) => channel.id === id,
+						),
+				),
+			),
+
+			tap((channels) =>
+				this.logger.verbose(
+					style.bGreen.apply(
+						`Filtered to ${channels.size} applicable text channels.`,
+					),
+				),
+			),
+
+			shareReplay({ refCount: false, bufferSize: 1 }),
+		);
+	}
+
+	public async pickWelcomingChannel(member: GuildMember) {
+		this.logger.log(
+			style.bMagenta.apply(
+				`Fetching a random onboarding text channnel for user ${member.user.username} (${member.user.id})...`,
+			),
+		);
+
+		const channels = await firstValueFrom(this.texts);
+
+		const channel = channels.random();
+
+		if (!channel) {
+			this.logger.error('The application was configured to have no channels.');
 
 			throw new Exception({
 				code: HttpStatus.NOT_IMPLEMENTED,
-				message: 'The application was configured to have no lounges.',
+				message: 'The application was configured to have no channels.',
 			});
 		}
 
-		const randomIndex = Math.floor(Math.random() * lounges.length);
-
-		const channel = (await this.context.getChannelByName(
-			lounges[randomIndex],
-		)) as TextChannel;
-
-		this.lastPick = channel;
-
-		this.logger.info(
-			`Selected channel "${channel.name}" (${channel.id}) as onboarding of user ${member.user.username} (${member.user.id}).`,
+		this.logger.fine(
+			style.bCyan.apply(
+				`Selected channel "${channel.name}" (${channel.id}) as onboarding of user ${member.user.username} (${member.user.id}).`,
+			),
 		);
 
-		return this.lastPick;
+		return channel;
 	}
 
-	async fetchActiveVoiceChannel(member: GuildMember) {
-		this.logger.info(
-			`Fetching an active, random onboarding voice channel for user ${member.user.username} (${member.user.id})...`,
+	public async pickEngagementChannel(member: GuildMember) {
+		this.logger.log(
+			style.bMagenta.apply(
+				`Fetching an active, random onboarding voice channel for user ${member.user.username} (${member.user.id})...`,
+			),
 		);
 
-		const channels = await this.context.getChannelsByType(
-			ChannelType.GuildVoice,
-		);
+		const channels = await firstValueFrom(this.voices);
 
-		const filtered = channels
-			.filter((channel) =>
-				channel
-					.permissionsFor(member)
-					.has(PermissionsBitField.Flags.ViewChannel),
-			)
-			.tap((v) =>
-				this.logger.verbose(
-					`${v.size} voice-channels where user have permissions to view the channel.`,
+		let channel = channels.random() ?? null;
+
+		if (!channel) {
+			this.logger.info(
+				style.bMagenta.apply(
+					`No engagement channel found, falling back to the default configured channel "${this.config.notification_voice_recommendation_default}"...`,
 				),
-			)
-			.filter((channel) =>
-				channel.permissionsFor(member).has(PermissionsBitField.Flags.Connect),
-			)
-			.tap((v) =>
-				this.logger.verbose(
-					`${v.size} voice-channels where user have permissions to connect.`,
-				),
-			)
-			.filter(
-				(channel) =>
-					channel.userLimit === 0 || channel.userLimit >= channel.members.size,
-			)
-			.tap((v) =>
-				this.logger.verbose(
-					`${v.size} voice-channels where user could join considering limits.`,
-				),
-			)
-			.filter((channel) => channel.members.size > 0)
-			.tap((v) =>
-				this.logger.verbose(`${v.size} voice-channels that are active.`),
 			);
 
-		const channel =
-			filtered.random() ||
-			((await this.context.getChannelById(
-				'1375686684158459977',
-			)) as VoiceChannel);
+			channel = (await firstValueFrom(
+				this.gateway.findChannelById(
+					this.config.notification_voice_recommendation_default,
+				),
+			)) as VoiceChannel;
+		}
 
-		this.logger.info(
-			`Selected channel "${channel.name}" (${channel.id}) as active voice channel for user ${member.user.username} (${member.user.id}).`,
+		this.logger.fine(
+			style.bCyan.apply(
+				`Selected channel "${channel.name}" (${channel.id}) as engagement voice channel for user ${member.user.username} (${member.user.id}).`,
+			),
 		);
 
 		return channel;

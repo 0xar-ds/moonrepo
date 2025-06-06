@@ -1,7 +1,7 @@
-import { ServerContextSchema } from '@server/config-schemas';
-
 import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
+
+import { ServerContextSchema } from '@~server/config-schemas';
 
 import {
 	ServerApplicationFeaturesSchema,

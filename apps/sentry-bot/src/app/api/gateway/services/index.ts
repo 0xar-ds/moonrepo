@@ -1,4 +1,3 @@
-export * from './discord.service.js';
-
+export * from './gateway/index.js';
 export * from './onboarding/index.js';
 export * from './customization/index.js';

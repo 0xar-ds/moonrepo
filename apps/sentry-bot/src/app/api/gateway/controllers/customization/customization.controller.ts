@@ -1,5 +1,4 @@
 import { Injectable, UseGuards } from '@nestjs/common';
-
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 
 import {
@@ -16,18 +15,17 @@ import {
 	StringSelect,
 } from 'necord';
 
-import { DeferReplyGuard } from '#guards/defer-reply.guard.js';
-
 import { CustomizationFeatureSchema } from '#config/schema/features/index.js';
-
-import { Messages } from '#lib/ui/messages.js';
+import { DeferReplyGuard } from '#guards/defer-reply.guard.js';
 
 import {
 	CustomizationKind,
 	CustomizationKindToSelectionType,
 } from '#lib/customization/index.js';
 
+import { Exception } from '#lib/exception.js';
 import { convertMessageCreateOptionsToInteractionEditReplyOptions } from '#lib/message.js';
+import { Messages } from '#lib/ui/messages.js';
 
 import {
 	ColorCustomizationService,
@@ -42,12 +40,12 @@ export class CustomizationController {
 		@OgmaLogger(CustomizationController)
 		private readonly logger: OgmaService,
 
-		private readonly config: CustomizationFeatureSchema,
-
 		private readonly notifications: NotificationCustomizationService,
 		private readonly countries: CountryCustomizationService,
 		private readonly genders: GenderCustomizationService,
 		private readonly colors: ColorCustomizationService,
+
+		private readonly config: CustomizationFeatureSchema,
 	) {}
 
 	@StringSelect('customization/color')
@@ -61,7 +59,7 @@ export class CustomizationController {
 				.editReply({ content: 'Interaction not-acceptable.' })
 				.catch());
 
-		const choices = this.colors.getChoices(),
+		const choices = this.colors.getChoicesSchema(),
 			selections = this.colors.getChoicesForSelection(
 				interaction.member,
 				selection,
@@ -83,7 +81,15 @@ export class CustomizationController {
 				Messages.Customization.Actions.Selected(selections),
 			));
 		} catch (e) {
-			this.logger.error(e);
+			if (e instanceof Exception) {
+				this.logger.info(e.message);
+
+				throw e;
+			}
+
+			return void (await interaction
+				.editReply({ content: 'Internal server error.' })
+				.catch());
 		}
 	}
 
@@ -98,7 +104,7 @@ export class CustomizationController {
 				.editReply({ content: 'Interaction not-acceptable.' })
 				.catch());
 
-		const choices = this.genders.getChoices(),
+		const choices = this.genders.getChoicesSchema(),
 			selections = this.genders.getChoicesForSelection(
 				interaction.member,
 				selection,
@@ -120,7 +126,15 @@ export class CustomizationController {
 				Messages.Customization.Actions.Selected(selections),
 			));
 		} catch (e) {
-			this.logger.error(e);
+			if (e instanceof Exception) {
+				this.logger.info(e.message);
+
+				throw e;
+			}
+
+			return void (await interaction
+				.editReply({ content: 'Internal server error.' })
+				.catch());
 		}
 	}
 
@@ -135,7 +149,7 @@ export class CustomizationController {
 				.editReply({ content: 'Interaction not-acceptable.' })
 				.catch());
 
-		const choices = this.countries.getChoices(),
+		const choices = this.countries.getChoicesSchema(),
 			selections = this.countries.getChoicesForSelection(
 				interaction.member,
 				selection,
@@ -161,7 +175,15 @@ export class CustomizationController {
 				Messages.Customization.Actions.Selected(selections),
 			));
 		} catch (e) {
-			this.logger.error(e);
+			if (e instanceof Exception) {
+				this.logger.info(e.message);
+
+				throw e;
+			}
+
+			return void (await interaction
+				.editReply({ content: 'Internal server error.' })
+				.catch());
 		}
 	}
 
@@ -176,7 +198,7 @@ export class CustomizationController {
 				.editReply({ content: 'Interaction not-acceptable.' })
 				.catch());
 
-		const choices = this.notifications.getChoices(),
+		const choices = this.notifications.getChoicesSchema(),
 			selections = this.notifications.getChoicesForSelection(
 				interaction.member,
 				selection,
@@ -184,7 +206,7 @@ export class CustomizationController {
 			);
 
 		try {
-			if (selection[0] === 'CLEAR_OPTIONS') {
+			if (selection.length === 0 || selection[0] === 'CLEAR_OPTIONS') {
 				await this.notifications.deselectChoices(
 					interaction.member,
 					selections,
@@ -205,7 +227,15 @@ export class CustomizationController {
 				Messages.Customization.Actions.Selected(selections),
 			));
 		} catch (e) {
-			this.logger.error(e);
+			if (e instanceof Exception) {
+				this.logger.info(e.message);
+
+				throw e;
+			}
+
+			return void (await interaction
+				.editReply({ content: 'Internal server error.' })
+				.catch());
 		}
 	}
 
@@ -225,7 +255,15 @@ export class CustomizationController {
 				),
 			));
 		} catch (e) {
-			return void console.error(e);
+			if (e instanceof Exception) {
+				this.logger.info(e.message);
+
+				throw e;
+			}
+
+			return void (await interaction
+				.editReply({ content: 'Internal server error.' })
+				.catch());
 		}
 	}
 

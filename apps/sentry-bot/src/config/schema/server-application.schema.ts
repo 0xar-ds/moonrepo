@@ -1,5 +1,4 @@
 import { Type } from 'class-transformer';
-
 import { IsNumberString, IsString, ValidateNested } from 'class-validator';
 
 import { CustomizationFeatureSchema } from './features/customization-feature.schema.js';

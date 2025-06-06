@@ -1,8 +1,8 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
-
+import { style } from '@ogma/styler';
 import { Collection, GuildMember, Role, Snowflake } from 'discord.js';
+import { map, shareReplay, tap } from 'rxjs';
 
 import {
 	CustomizationChoices,
@@ -12,56 +12,72 @@ import {
 } from '#lib/customization/index.js';
 
 import { Exception, StatusCode } from '#lib/exception.js';
-
-import { DiscordGatewayService } from '#services/index.js';
+import { SharedRefresh } from '#lib/rxjs/index.js';
+import { RolesGatewayService } from '#services/index.js';
 
 @Injectable()
 export abstract class CustomizationService<
 	T extends CustomizationDefinition,
 	C extends CustomizationChoices<T>,
 > {
+	private readonly roles$: SharedRefresh<Collection<string, Role>>;
+
+	public get roles() {
+		return this.roles$;
+	}
+
 	constructor(
 		@OgmaLogger(CustomizationService.name)
 		protected readonly logger: OgmaService,
 
-		protected readonly context: DiscordGatewayService,
-	) {}
-
-	public abstract getChoices(): C;
-
-	// TODO: consider deprecating
-	public async assignChoice(
-		member: GuildMember,
-		choice: T,
-		choices: C = this.getChoices(),
+		@Inject(RolesGatewayService)
+		protected readonly gateway: RolesGatewayService,
 	) {
-		this.logger.info(`Setting choice ${choice.label} (${choice.value})...`);
+		this.roles$ = this.gateway.roles.pipe(
+			tap((roles) =>
+				this.logger.verbose(
+					style.bYellow.apply(`Filtering ${roles.size} roles...`),
+				),
+			),
 
-		this.validateChoiceSelection(choice, choices);
+			map((roles) => {
+				const schema = this.getChoicesSchema();
 
-		const result = await this.applyChoice(member, choice);
+				return roles.filter((role) => schema.has(role.id));
+			}),
 
-		this.logger.info(
-			`Successfully set choice ${choice.label} (${choice.value}) for member ${member.user.username} (${member.user.id}).`,
+			tap((roles) =>
+				this.logger.verbose(
+					style.bGreen.apply(`Filtered to ${roles.size} roles.`),
+				),
+			),
+
+			shareReplay({ refCount: false, bufferSize: 1 }),
 		);
-
-		return result;
 	}
+
+	public abstract getChoicesSchema(): C;
 
 	public async selectChoices(
 		target: GuildMember,
-		choices: C = this.getChoices(),
+		choices: C = this.getChoicesSchema(),
 	): Promise<void> {
-		this.logger.info(
-			`Adding choices ${Array.from(choices)
-				.map(([id, choice]) => `${choice.label} (${id})`)
-				.join(', ')} to member ${target.user.username} (${target.user.id})...`,
+		this.logger.log(
+			style.bYellow.apply(
+				`Adding choices ${Array.from(choices)
+					.map(([id, choice]) => `${choice.label} (${id})`)
+					.join(
+						', ',
+					)} to member ${target.user.username} (${target.user.id})...`,
+			),
 		);
 
 		try {
 			for (const [, choice] of choices) await this.applyChoice(target, choice);
 
-			return void this.logger.info(`Successfully added all choices to member.`);
+			return void this.logger.fine(
+				style.bGreen.apply(`Successfully added all choices to member.`),
+			);
 		} catch (e) {
 			this.logger.error(`Failed to add a choice to member.`);
 
@@ -71,21 +87,23 @@ export abstract class CustomizationService<
 
 	public async deselectChoices(
 		target: GuildMember,
-		choices: C = this.getChoices(),
+		choices: C = this.getChoicesSchema(),
 	): Promise<void> {
-		this.logger.info(
-			`Removing choices ${Array.from(choices)
-				.map(([id, choice]) => `${choice.label} (${id})`)
-				.join(
-					', ',
-				)} from member ${target.user.username} (${target.user.id})...`,
+		this.logger.log(
+			style.bYellow.apply(
+				`Removing choices ${Array.from(choices)
+					.map(([id, choice]) => `${choice.label} (${id})`)
+					.join(
+						', ',
+					)} from member ${target.user.username} (${target.user.id})...`,
+			),
 		);
 
 		try {
 			for (const [, choice] of choices) await this.removeChoice(target, choice);
 
-			return void this.logger.info(
-				`Successfully removed all choices from member.`,
+			return void this.logger.fine(
+				style.bGreen.apply(`Successfully removed all choices from member.`),
 			);
 		} catch (e) {
 			this.logger.error(`Failed to remove a choice from member.`);
@@ -97,12 +115,14 @@ export abstract class CustomizationService<
 	public async spliceChoices(
 		target: GuildMember,
 		selection: C,
-		choices: C = this.getChoices(),
-	) {
-		this.logger.info(
-			`Synchronizing choices to selection ${Array.from(selection)
-				.map(([id, choice]) => `${choice.label} (${id})`)
-				.join(', ')}...`,
+		choices: C = this.getChoicesSchema(),
+	): Promise<void> {
+		this.logger.log(
+			style.bMagenta.apply(
+				`Synchronizing choices to selection ${Array.from(selection)
+					.map(([id, choice]) => `${choice.label} (${id})`)
+					.join(', ')}...`,
+			),
 		);
 
 		const remove = choices.filter(
@@ -114,12 +134,16 @@ export abstract class CustomizationService<
 
 		await this.deselectChoices(target, remove);
 
-		return await this.selectChoices(target, selection);
+		await this.selectChoices(target, selection);
+
+		return void this.logger.fine(
+			style.bCyan.apply(`Synchronized choices to selection.`),
+		);
 	}
 
 	public getChoiceForId(
 		snowflake: Snowflake,
-		choices: C = this.getChoices(),
+		choices: C = this.getChoicesSchema(),
 	): T {
 		for (const [id, choice] of choices) {
 			if (id === snowflake) return choice;
@@ -128,21 +152,12 @@ export abstract class CustomizationService<
 		throw new Exception(StatusCode.UNPROCESSABLE_ENTITY);
 	}
 
-	public filterChoicesByIds(
-		ids: Snowflake[],
-		choices: C = this.getChoices(),
-	): C {
-		return choices.filter((choice) =>
-			ids.some((id) => id === choice.value),
-		) as C;
-	}
-
 	public getChoicesForSelection(
 		actor: GuildMember,
 		selection: CustomizationKindToSelectionType[CustomizationKind],
-		choices: C = this.getChoices(),
+		choices: C = this.getChoicesSchema(),
 	): C {
-		if (selection[0] === 'CLEAR_OPTIONS')
+		if (selection.length === 0 || selection[0] === 'CLEAR_OPTIONS')
 			return choices.filter((choice) =>
 				actor.roles.cache.has(choice.value),
 			) as C;
@@ -150,17 +165,30 @@ export abstract class CustomizationService<
 		return this.filterChoicesByIds(selection, choices);
 	}
 
+	protected filterChoicesByIds(
+		ids: Snowflake[],
+		choices: C = this.getChoicesSchema(),
+	): C {
+		return choices.filter((choice) =>
+			ids.some((id) => id === choice.value),
+		) as C;
+	}
+
 	private async applyChoice(
 		target: GuildMember,
 		choice: T,
 	): Promise<GuildMember> {
-		this.logger.verbose(
-			`Applying choice ${choice.label} (${choice.value}) to member...`,
+		this.logger.log(
+			style.bYellow.apply(
+				`Applying choice ${choice.label} (${choice.value}) to member...`,
+			),
 		);
 
 		if (target.roles.cache.has(choice.value)) {
-			this.logger.verbose(
-				`Choice ${choice.label} (${choice.value}) is already assigned to member, skipping addition.`,
+			this.logger.fine(
+				style.bGreen.apply(
+					`Choice ${choice.label} (${choice.value}) is already assigned to member, skipping addition.`,
+				),
 			);
 
 			return target;
@@ -169,8 +197,10 @@ export abstract class CustomizationService<
 		try {
 			const result = await target.roles.add(choice.value);
 
-			this.logger.verbose(
-				`Applied choice ${choice.label} (${choice.value}) to member.`,
+			this.logger.fine(
+				style.bGreen.apply(
+					`Applied choice ${choice.label} (${choice.value}) to member.`,
+				),
 			);
 
 			return result;
@@ -187,13 +217,17 @@ export abstract class CustomizationService<
 		target: GuildMember,
 		choice: T,
 	): Promise<GuildMember> {
-		this.logger.verbose(
-			`Removing choice ${choice.label} (${choice.value}) to member...`,
+		this.logger.log(
+			style.bYellow.apply(
+				`Removing choice ${choice.label} (${choice.value}) to member...`,
+			),
 		);
 
 		if (!target.roles.cache.has(choice.value)) {
-			this.logger.verbose(
-				`Choice ${choice.label} (${choice.value}) is not assigned to member, skipping removal.`,
+			this.logger.fine(
+				style.bGreen.apply(
+					`Choice ${choice.label} (${choice.value}) is not assigned to member, skipping removal.`,
+				),
 			);
 
 			return target;
@@ -202,8 +236,10 @@ export abstract class CustomizationService<
 		try {
 			const result = await target.roles.remove(choice.value);
 
-			this.logger.verbose(
-				`Removed choice ${choice.label} (${choice.value}) to member.`,
+			this.logger.fine(
+				style.bGreen.apply(
+					`Removed choice ${choice.label} (${choice.value}) to member.`,
+				),
 			);
 
 			return result;
@@ -234,9 +270,9 @@ export abstract class CustomizationService<
 
 	private validateChoiceSelection(
 		choice: T,
-		choices: C = this.getChoices(),
+		choices: C = this.getChoicesSchema(),
 	): C {
-		this.logger.verbose(
+		this.logger.log(
 			`Validating choice selection ${choice.label} (${choice.value})...`,
 		);
 

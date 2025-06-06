@@ -1,13 +1,13 @@
 import {
 	CategoryChannel,
-	TextChannel,
-	NewsChannel,
-	ThreadChannel,
+	ChannelType,
 	ForumChannel,
 	MediaChannel,
-	VoiceChannel,
+	NewsChannel,
 	StageChannel,
-	ChannelType,
+	TextChannel,
+	ThreadChannel,
+	VoiceChannel,
 } from 'discord.js';
 
 export function isChannelOfType<T extends ChannelType & keyof ChannelTypeMap>(

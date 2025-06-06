@@ -1,18 +1,14 @@
-import { Injectable } from '@nestjs/common';
-
+import { Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 
 import { NotificationsCustomizationSchema } from '#config/schema/features/index.js';
 
 import {
-	NotificationDefinition,
 	NotificationChoices,
+	NotificationDefinition,
 } from '#lib/customization/index.js';
 
-import {
-	DiscordGatewayService,
-	CustomizationService,
-} from '#services/index.js';
+import { CustomizationService, RolesGatewayService } from '#services/index.js';
 
 @Injectable()
 export class NotificationCustomizationService extends CustomizationService<
@@ -21,15 +17,18 @@ export class NotificationCustomizationService extends CustomizationService<
 > {
 	constructor(
 		@OgmaLogger(NotificationCustomizationService)
-		logger: OgmaService,
-		context: DiscordGatewayService,
+		protected override readonly logger: OgmaService,
 
+		@Inject(RolesGatewayService)
+		protected override readonly gateway: RolesGatewayService,
+
+		@Inject(NotificationsCustomizationSchema)
 		private readonly config: NotificationsCustomizationSchema,
 	) {
-		super(logger, context);
+		super(logger, gateway);
 	}
 
-	override getChoices(): NotificationChoices {
+	override getChoicesSchema(): NotificationChoices {
 		return this.config.choices;
 	}
 }

@@ -1,6 +1,6 @@
 export * from './customization.service.js';
 
-export * from './type/color-customization.service.js';
-export * from './type/gender-customization.service.js';
-export * from './type/country-customization.service.js';
-export * from './type/notifications-customization.service.js';
+export * from './kind/color-customization.service.js';
+export * from './kind/gender-customization.service.js';
+export * from './kind/country-customization.service.js';
+export * from './kind/notifications-customization.service.js';

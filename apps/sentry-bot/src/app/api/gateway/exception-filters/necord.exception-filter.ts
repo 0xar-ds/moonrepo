@@ -1,5 +1,4 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
-
 import { NecordArgumentsHost } from 'necord';
 
 import { Exception } from '#lib/exception.js';

@@ -19,8 +19,6 @@ import {
 	SeparatorBuilder,
 } from 'discord.js';
 
-import { Mutable } from '#lib/mutable.js';
-
 import { formatComponentEmojiResolvable } from '#lib/emoji.js';
 
 import {
@@ -36,7 +34,7 @@ export const Messages = {
 	Onboarding: {
 		WelcomeMessage: (
 			member: GuildMember,
-			activeVoiceChannel: VoiceChannel | undefined = undefined,
+			activeVoiceChannel: VoiceChannel,
 			colorsChannelURL = 'https://discord.com/channels/1285051244871946243/1372850097854873601',
 			rolesChannelURL = 'https://discord.com/channels/1285051244871946243/1372850142507569244',
 		): MessageCreateOptions => {
@@ -115,7 +113,7 @@ export const Messages = {
 
 					banner = config.panel_banner;
 
-					menu.setMinValues(1);
+					menu.setMinValues(0);
 					menu.setMaxValues(config.choices.size);
 
 					menu.setOptions(...config.choices.values());
@@ -215,17 +213,22 @@ export const Messages = {
 				const container = new ContainerBuilder();
 
 				container.addTextDisplayComponents((text) =>
+					text.setContent('Has elegido las siguientes opciones: '),
+				);
+
+				container.addSeparatorComponents((separator) =>
+					separator.setDivider(true).setSpacing(SeparatorSpacingSize.Small),
+				);
+
+				container.addTextDisplayComponents((text) =>
 					text.setContent(
-						[
-							'Has elegido las siguientes opciones: ',
-							[...choices.values()]
-								.map((choice) =>
-									choice.emoji
-										? `${formatComponentEmojiResolvable(choice.emoji)}・${choice.label}`
-										: choice.label,
-								)
-								.join('\n'),
-						].join('\n'),
+						[...choices.values()]
+							.map((choice) =>
+								choice.emoji
+									? `${formatComponentEmojiResolvable(choice.emoji)}・${choice.label}`
+									: choice.label,
+							)
+							.join('\n'),
 					),
 				);
 
@@ -245,17 +248,22 @@ export const Messages = {
 				const container = new ContainerBuilder();
 
 				container.addTextDisplayComponents((text) =>
+					text.setContent('Se te han removido las siguientes opciones: '),
+				);
+
+				container.addSeparatorComponents((separator) =>
+					separator.setDivider(true).setSpacing(SeparatorSpacingSize.Small),
+				);
+
+				container.addTextDisplayComponents((text) =>
 					text.setContent(
-						[
-							'Se te han removido las siguientes opciones: ',
-							[...choices.values()]
-								.map((choice) =>
-									choice.emoji
-										? `${formatComponentEmojiResolvable(choice.emoji)}・${choice.label}`
-										: choice.label,
-								)
-								.join('\n'),
-						].join('\n'),
+						[...choices.values()]
+							.map((choice) =>
+								choice.emoji
+									? `${formatComponentEmojiResolvable(choice.emoji)}・${choice.label}`
+									: choice.label,
+							)
+							.join('\n'),
 					),
 				);
 

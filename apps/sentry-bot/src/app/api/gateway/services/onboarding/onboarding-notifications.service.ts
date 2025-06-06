@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
-
 import { GuildMember, TextChannel, VoiceChannel } from 'discord.js';
 
 import { Messages } from '#lib/ui/messages.js';
@@ -16,9 +14,9 @@ export class OnboardingNotificationService {
 	async notifyNewcomer(
 		member: GuildMember,
 		channel: TextChannel,
-		activeVoiceChannel: VoiceChannel | undefined,
+		activeVoiceChannel: VoiceChannel,
 	) {
-		this.logger.info(
+		this.logger.log(
 			`Notifying user ${member.user.username} (${member.user.id}) of onboarding in channel ${channel.name} (${channel.id})...`,
 		);
 
@@ -27,7 +25,7 @@ export class OnboardingNotificationService {
 				Messages.Onboarding.WelcomeMessage(member, activeVoiceChannel),
 			);
 
-			this.logger.info(
+			this.logger.fine(
 				`Onboarding notification (${message.channelId}/${message.id}) sent for user ${member.user.username} (${member.user.id}).`,
 			);
 
