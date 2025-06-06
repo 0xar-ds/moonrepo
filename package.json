@@ -10,5 +10,6 @@
   },
   "engines": {
     "node": "23.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.11.1"
 }
