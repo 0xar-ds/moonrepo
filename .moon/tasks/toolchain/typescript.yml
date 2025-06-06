@@ -1,3 +1,25 @@
+implicitDeps:
+  - '^:build'
+
+implicitInputs:
+  - '@group(configs)'
+  - '@group(sources)'
+
+fileGroups:
+  configs:
+    - 'package.json'
+    - 'tsconfig.json'
+    - 'tsconfig.{build,spec}.json'
+    - '*.config.{j,t}s'
+  sources:
+    - 'src/**/*.ts'
+    - '!src/**/*.spec.ts'
+  tests:
+    - 'src/**/*.ts'
+    - 'src/**/*.spec.ts'
+    - 'tests/**/*.ts'
+  outputs:
+    - 'dist/**/*'
 # tasks:
 # typecheck:
 # command:
