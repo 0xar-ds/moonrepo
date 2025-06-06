@@ -29,15 +29,66 @@ export default ts.config(
       }
     },
     rules: { 
-      "no-undef": "off"
+      "no-undef": "off",
+      "import-x/order": [
+        "error",
+        makeImportXOrderRuleDefinition()
+      ]
     },
     settings: {
       "import-x/resolver-next": [
         createTypeScriptImportResolver({
           alwaysTryTypes: true,
+          project: './tsconfig.json'
         }),
         createNodeResolver()
-      ]
-    }
+      ],
+    },
   }
 );
+
+/**
+ * @returns {import('eslint-plugin-import-x/rules/order').Options}
+ */
+function makeImportXOrderRuleDefinition() {
+  return {
+    groups: [
+      "builtin",
+      "external", 
+      "object",
+      "internal",
+      ["parent", "sibling"],
+      "index",
+      "type"
+    ],
+    pathGroups: [
+      {
+        pattern: "#**/**",
+        group: "internal",
+        position: "before",
+      },
+      {
+        pattern: "@~**/**",
+        group: "external",
+        position: "after",
+      }
+    ],
+    pathGroupsExcludedImportTypes: ["builtin"],
+    
+    sortTypesGroup: true,
+
+    "newlines-between": "always-and-inside-groups",
+    "newlines-between-types": "always-and-inside-groups",
+
+    named: true,
+
+    alphabetize: {
+      order: "asc",
+      orderImportKind: "ignore",
+      caseInsensitive: true,
+    },
+
+    consolidateIslands: "inside-groups",
+    
+  }
+}
