@@ -3,8 +3,8 @@ tasks:
     type: run
     preset: watcher
     description: 'Runs nest build with the --watch flag.'
-    command: 'nest start --watch --path ./tsconfig.build.json'
     local: true
+    command: 'nest start --watch --path ./tsconfig.build.json'
     deps:
       - '^:build'
   build:

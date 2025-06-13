@@ -5,6 +5,8 @@ tasks:
     description: 'Runs tsc with build configuration on watch mode.'
     local: true
     command: 'tsc --project ./tsconfig.build.json --watch'
+    deps:
+      - '^:build'
   build:
     type: build
     description: 'Runs tsc with the build configuration.'
