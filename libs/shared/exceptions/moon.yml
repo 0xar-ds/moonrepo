@@ -1,0 +1,12 @@
+type: library
+language: typescript
+stack: unknown
+tags:
+  - 'tsc'
+  - 'eslint'
+  - 'prettier'
+  - 'code-quality'
+
+project:
+  name: 'libs/shared/exceptions'
+  description: 'Shared exceptions structs through kind of systems.'
