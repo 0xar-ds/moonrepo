@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 import { style } from '@ogma/styler';
 
@@ -11,13 +11,23 @@ import {
 	VoiceChannel,
 } from 'discord.js';
 
-import { firstValueFrom, map, Observable, shareReplay, tap } from 'rxjs';
+import {
+	catchError,
+	firstValueFrom,
+	map,
+	Observable,
+	shareReplay,
+	tap,
+	throwError,
+	timeout,
+} from 'rxjs';
+
+import { HttpStatus, Status } from '@~server/core-api';
+import { Exception } from '@~shared/exceptions';
 
 import { OnboardingFeatureApplicationSchema } from '#config/schema/features/index.js';
 import { isChannelOfType } from '#lib/channel-type.js';
-import { Exception } from '#lib/exception.js';
-
-import { ChannelsGatewayService } from '../gateway/channels-gateway.service.js';
+import { ChannelsGatewayService } from '#services/index.js';
 
 @Injectable()
 export class OnboardingDecisionService {
@@ -87,6 +97,7 @@ export class OnboardingDecisionService {
 			map((channels) =>
 				channels.filter((v) => isChannelOfType(v, ChannelType.GuildText)),
 			),
+
 			map((channels) =>
 				channels.filter(
 					(channel) =>
@@ -119,7 +130,34 @@ export class OnboardingDecisionService {
 			),
 		);
 
-		const channels = await firstValueFrom(this.texts);
+		const channels = await firstValueFrom(
+			this.texts.pipe(
+				timeout({
+					each: 5000,
+					with: (timeoutInfo) =>
+						throwError(
+							() =>
+								new Exception(
+									Status.SERVICE_UNAVAILABLE,
+									'Failed to resolve to a text channel within reasonable time.',
+									timeoutInfo,
+								),
+						),
+				}),
+
+				catchError((error) => {
+					if (error instanceof Exception) return throwError(() => error);
+
+					return throwError(
+						() =>
+							new Exception(
+								Status.INTERNAL_ERROR,
+								'Internal Server Error occurred whilst resolving to a text channel.',
+							),
+					);
+				}),
+			),
+		);
 
 		const channel = channels.random();
 

@@ -2,13 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 
 import { NotificationsCustomizationSchema } from '#config/schema/features/index.js';
+import { CustomizationService, RolesGatewayService } from '#services/index.js';
 
-import {
+import type {
 	NotificationChoices,
 	NotificationDefinition,
 } from '#lib/customization/index.js';
-
-import { CustomizationService, RolesGatewayService } from '#services/index.js';
 
 @Injectable()
 export class NotificationCustomizationService extends CustomizationService<

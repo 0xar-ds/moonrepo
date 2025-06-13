@@ -1,3 +1,3 @@
 export * from './customization/index.js';
 
-export * from './onboarding-features.schema.js';
+export * from './onboarding-feature.schema.js';

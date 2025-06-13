@@ -1,19 +1,3 @@
-import {
-	ColorCustomizationService,
-	CountryCustomizationService,
-	GenderCustomizationService,
-	NotificationCustomizationService,
-} from '#services/index.js';
-
-import { ColorChoices, ColorDefinition } from './kind/colors.js';
-import { CountryChoices, CountryDefinition } from './kind/countries.js';
-import { GenderChoices, GenderDefinition } from './kind/genders.js';
-
-import {
-	NotificationChoices,
-	NotificationDefinition,
-} from './kind/notifications.js';
-
 import type {
 	Collection,
 	SelectMenuComponentOptionData,
@@ -27,6 +11,22 @@ import type {
 	NotificationsCustomizationSchema,
 } from '#config/schema/features/index.js';
 
+import type {
+	ColorCustomizationService,
+	CountryCustomizationService,
+	GenderCustomizationService,
+	NotificationCustomizationService,
+} from '#services/index.js';
+
+import type { ColorChoices, ColorDefinition } from './kind/colors.js';
+import type { CountryChoices, CountryDefinition } from './kind/countries.js';
+import type { GenderChoices, GenderDefinition } from './kind/genders.js';
+
+import type {
+	NotificationChoices,
+	NotificationDefinition,
+} from './kind/notifications.js';
+
 export enum CustomizationKind {
 	Color = 'color',
 	Gender = 'gender',
@@ -34,40 +34,61 @@ export enum CustomizationKind {
 	Notification = 'notifications',
 }
 
-export interface CustomizationKindToSelectionType {
-	[CustomizationKind.Color]: [Snowflake] | ['CLEAR_OPTIONS'];
-	[CustomizationKind.Gender]: [Snowflake] | ['CLEAR_OPTIONS'];
-	[CustomizationKind.Country]: [Snowflake] | ['CLEAR_OPTIONS'];
-	[CustomizationKind.Notification]: Snowflake[];
+export interface CustomizationFeatures {
+	[CustomizationKind.Color]: {
+		selection: [Snowflake] | ['CLEAR_OPTIONS'];
+		definition: ColorDefinition;
+		choices: ColorChoices;
+		service: ColorCustomizationService;
+		schema: ColorsCustomizationSchema;
+	};
+	[CustomizationKind.Gender]: {
+		selection: [Snowflake] | ['CLEAR_OPTIONS'];
+		definition: GenderDefinition;
+		choices: GenderChoices;
+		service: GenderCustomizationService;
+		schema: GendersCustomizationSchema;
+	};
+	[CustomizationKind.Country]: {
+		selection: [Snowflake] | ['CLEAR_OPTIONS'];
+		definition: CountryDefinition;
+		choices: CountryChoices;
+		service: CountryCustomizationService;
+		schema: CountriesCustomizationSchema;
+	};
+	[CustomizationKind.Notification]: {
+		selection: Snowflake[];
+		definition: NotificationDefinition;
+		choices: NotificationChoices;
+		service: NotificationCustomizationService;
+		schema: NotificationsCustomizationSchema;
+	};
 }
 
-export interface CustomizationSchemaMap {
-	[CustomizationKind.Color]: ColorsCustomizationSchema;
-	[CustomizationKind.Gender]: GendersCustomizationSchema;
-	[CustomizationKind.Country]: CountriesCustomizationSchema;
-	[CustomizationKind.Notification]: NotificationsCustomizationSchema;
-}
+export type CustomizationRequestContext<
+	T extends keyof CustomizationFeatures = keyof CustomizationFeatures,
+> = {
+	[K in keyof CustomizationFeatures]: Prettify<
+		{
+			type: K;
+		} & CustomizationFeatures[K]
+	>;
+}[T];
 
-export interface CustomizationDefinitionMap {
-	[CustomizationKind.Color]: ColorDefinition;
-	[CustomizationKind.Gender]: GenderDefinition;
-	[CustomizationKind.Country]: CountryDefinition;
-	[CustomizationKind.Notification]: NotificationDefinition;
-}
+export type SelectionFor<K extends CustomizationKind> =
+	CustomizationRequestContext<K>['selection'];
 
-export interface CustomizationChoicesMap {
-	[CustomizationKind.Color]: ColorChoices;
-	[CustomizationKind.Gender]: GenderChoices;
-	[CustomizationKind.Country]: CountryChoices;
-	[CustomizationKind.Notification]: NotificationChoices;
-}
+export type DefinitionFor<K extends CustomizationKind> =
+	CustomizationRequestContext<K>['definition'];
 
-export interface CustomizationServiceMap {
-	[CustomizationKind.Color]: ColorCustomizationService;
-	[CustomizationKind.Gender]: GenderCustomizationService;
-	[CustomizationKind.Country]: CountryCustomizationService;
-	[CustomizationKind.Notification]: NotificationCustomizationService;
-}
+export type ChoicesFor<K extends CustomizationKind> =
+	CustomizationRequestContext<K>['choices'];
+
+export type ServiceFor<K extends CustomizationKind> =
+	CustomizationRequestContext<K>['service'];
+
+export type SchemaFor<K extends CustomizationKind> =
+	CustomizationRequestContext<K>['schema'];
 
 export type CustomizationDefinition = Omit<
 	SelectMenuComponentOptionData,

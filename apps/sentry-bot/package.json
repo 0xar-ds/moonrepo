@@ -48,7 +48,10 @@
 		}
 	},
 	"dependencies": {
+    "@~shared/exceptions": "workspace:^",
+    "@~rxjs/shared-replay": "workspace:^",
 		"@~server/config-schemas": "workspace:^",
+    "@~server/core-api": "workspace:^",
 		"@nestjs/common": "^11.1.1",
 		"@nestjs/core": "^11.1.1",
 		"@nestjs/platform-express": "^11.1.1",

@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 import { style } from '@ogma/styler';
 
@@ -11,21 +11,19 @@ import {
 
 import { map, Observable, switchMap, tap } from 'rxjs';
 
+import { SharedReplayRefresh } from '@~rxjs/shared-replay';
+import { Status } from '@~server/core-api';
+import { Exception } from '@~shared/exceptions';
+
 import {
 	ChannelTypeMap,
 	getChannelTypeKey,
 	isChannelOfType,
 } from '#lib/channel-type.js';
 
-import { Exception } from '#lib/exception.js';
+import { fetchOrThrow, findInCollectionOrThrow } from '#lib/rxjs/index.js';
 
-import {
-	fetchOrThrow,
-	findInCollectionOrThrow,
-	SharedReplayRefresh,
-} from '#lib/rxjs/index.js';
-
-import { GatewayService } from './base-gateway.service.js';
+import { GatewayService } from '../gateway.service.js';
 import { GuildGatewayService } from './guild-gateway.service.js';
 
 @Injectable()
@@ -62,18 +60,19 @@ export class ChannelsGatewayService extends GatewayService {
 			tap(() =>
 				this.logger.verbose(style.bYellow.apply('Fetching channels...')),
 			),
+
 			map((guild) => guild.channels),
+
 			switchMap((manager) =>
 				fetchOrThrow(
 					manager.fetch(),
 					() =>
-						new Exception({
-							code: HttpStatus.INTERNAL_SERVER_ERROR,
-							message: `Failed to fetch channels.`,
-						}),
+						new Exception(Status.INTERNAL_ERROR, `Failed to fetch channels.`),
 				),
 			),
+
 			map((channels) => channels.filter((channel) => channel !== null)),
+
 			tap((channels) =>
 				this.logger.verbose(
 					style.bGreen.apply(`Fetched ${channels.size} channels.`),
@@ -95,17 +94,19 @@ export class ChannelsGatewayService extends GatewayService {
 					style.bYellow.apply(`Finding channel by name "${name}"...`),
 				),
 			),
+
 			switchMap((channels) =>
 				findInCollectionOrThrow(
 					channels,
 					(channel) => channel.name === name,
 					() =>
-						new Exception({
-							code: HttpStatus.NOT_FOUND,
-							message: `Channel with name "${name}" not found.`,
-						}),
+						new Exception(
+							Status.NOT_FOUND_ERROR,
+							`Channel with name "${name}" not found.`,
+						),
 				),
 			),
+
 			tap((channel) =>
 				this.logger.verbose(
 					style.bGreen.apply(
@@ -123,17 +124,19 @@ export class ChannelsGatewayService extends GatewayService {
 					style.bYellow.apply(`Finding channel by ID "${id}"...`),
 				),
 			),
+
 			switchMap((channels) =>
 				findInCollectionOrThrow(
 					channels,
 					(channel) => channel.id === id,
 					() =>
-						new Exception({
-							code: HttpStatus.NOT_FOUND,
-							message: `Channel with ID "${id}" not found.`,
-						}),
+						new Exception(
+							Status.NOT_FOUND_ERROR,
+							`Channel with ID "${id}" not found.`,
+						),
 				),
 			),
+
 			tap((channel) =>
 				this.logger.verbose(
 					style.bGreen.apply(
@@ -157,9 +160,11 @@ export class ChannelsGatewayService extends GatewayService {
 					),
 				),
 			),
+
 			map((channels) =>
 				channels.filter((channel) => isChannelOfType(channel, type)),
 			),
+
 			tap((channels) =>
 				this.logger.verbose(
 					style.bGreen.apply(`Found ${channels.size} channels of type ${key}.`),

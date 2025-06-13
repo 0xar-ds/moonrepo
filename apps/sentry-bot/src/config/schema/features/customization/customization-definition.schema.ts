@@ -48,6 +48,7 @@ class IsComponentEmojiResolvableConstraint
 
 		if (typeof emoji === 'object' && emoji !== null) {
 			const emojiObject = new APIMessageComponentEmojiClass();
+
 			Object.assign(emojiObject, emoji);
 
 			this.nestedErrors = validateSync(emojiObject, {

@@ -1,14 +1,17 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 import { style } from '@ogma/styler';
 import { Client, Guild } from 'discord.js';
 import { Observable, switchMap, tap } from 'rxjs';
 
-import { ServerApplicationSchema } from '#config/schema/server-application.schema.js';
-import { Exception } from '#lib/exception.js';
-import { fetchOrThrow, SharedReplayRefresh } from '#lib/rxjs/index.js';
+import { SharedReplayRefresh } from '@~rxjs/shared-replay';
+import { Status } from '@~server/core-api';
+import { Exception } from '@~shared/exceptions';
 
-import { GatewayService } from './base-gateway.service.js';
+import { ServerApplicationSchema } from '#config/schema/server-application.schema.js';
+import { fetchOrThrow } from '#lib/rxjs/index.js';
+
+import { GatewayService } from '../gateway.service.js';
 
 @Injectable()
 export class GuildGatewayService extends GatewayService {
@@ -23,10 +26,10 @@ export class GuildGatewayService extends GatewayService {
 			fetchOrThrow(
 				this.client.guilds.fetch(this.config.guild),
 				() =>
-					new Exception({
-						code: HttpStatus.NOT_FOUND,
-						message: `Guild provided by the application (${this.config.guild}) not found.`,
-					}),
+					new Exception(
+						Status.NOT_FOUND_ERROR,
+						`Guild provided by the application (${this.config.guild}) not found.`,
+					),
 			),
 		),
 		tap((guild) =>

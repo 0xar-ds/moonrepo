@@ -1,6 +1,6 @@
-export * from './base-gateway.service.js';
+export * from './gateway.service.js';
 
-export * from './guild-gateway.service.js';
+export * from './kind/guild-gateway.service.js';
 
-export * from './roles-gateway.service.js';
-export * from './channels-gateway.service.js';
+export * from './kind/roles-gateway.service.js';
+export * from './kind/channels-gateway.service.js';

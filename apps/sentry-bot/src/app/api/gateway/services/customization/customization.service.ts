@@ -4,14 +4,16 @@ import { style } from '@ogma/styler';
 import { Collection, GuildMember, Role, Snowflake } from 'discord.js';
 import { map, shareReplay, tap } from 'rxjs';
 
+import { Status } from '@~server/core-api';
+import { Exception } from '@~shared/exceptions';
+
 import {
 	CustomizationChoices,
 	CustomizationDefinition,
 	CustomizationKind,
-	CustomizationKindToSelectionType,
+	SelectionFor,
 } from '#lib/customization/index.js';
 
-import { Exception, StatusCode } from '#lib/exception.js';
 import { SharedRefresh } from '#lib/rxjs/index.js';
 import { RolesGatewayService } from '#services/index.js';
 
@@ -149,12 +151,12 @@ export abstract class CustomizationService<
 			if (id === snowflake) return choice;
 		}
 
-		throw new Exception(StatusCode.UNPROCESSABLE_ENTITY);
+		throw new Exception(Status.UNPROCESSABLE_ENTITY);
 	}
 
 	public getChoicesForSelection(
 		actor: GuildMember,
-		selection: CustomizationKindToSelectionType[CustomizationKind],
+		selection: SelectionFor<CustomizationKind>,
 		choices: C = this.getChoicesSchema(),
 	): C {
 		if (selection.length === 0 || selection[0] === 'CLEAR_OPTIONS')
@@ -281,7 +283,7 @@ export abstract class CustomizationService<
 
 			this.logger.error(message);
 
-			throw new Exception(StatusCode.UNPROCESSABLE_ENTITY, message);
+			throw new Exception(Status.UNPROCESSABLE_ENTITY, message);
 		}
 
 		return choices;

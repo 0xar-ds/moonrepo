@@ -1,18 +1,16 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 import { style } from '@ogma/styler';
 import { Client, Collection, Role, Snowflake } from 'discord.js';
 import { map, Observable, switchMap, tap } from 'rxjs';
 
-import { Exception } from '#lib/exception.js';
+import { SharedReplayRefresh } from '@~rxjs/shared-replay';
+import { Status } from '@~server/core-api';
+import { Exception } from '@~shared/exceptions';
 
-import {
-	fetchOrThrow,
-	findInCollectionOrThrow,
-	SharedReplayRefresh,
-} from '#lib/rxjs/index.js';
+import { fetchOrThrow, findInCollectionOrThrow } from '#lib/rxjs/index.js';
 
-import { GatewayService } from './base-gateway.service.js';
+import { GatewayService } from '../gateway.service.js';
 import { GuildGatewayService } from './guild-gateway.service.js';
 
 @Injectable()
@@ -43,17 +41,16 @@ export class RolesGatewayService extends GatewayService {
 
 		this.fetch$ = this.context.guild.pipe(
 			tap(() => this.logger.verbose(style.bYellow.apply('Fetching roles...'))),
+
 			map((guild) => guild.roles),
+
 			switchMap((manager) =>
 				fetchOrThrow(
 					manager.fetch(),
-					() =>
-						new Exception({
-							code: HttpStatus.INTERNAL_SERVER_ERROR,
-							message: `Failed to fetch roles.`,
-						}),
+					() => new Exception(Status.INTERNAL_ERROR, 'Failed to fetch roles.'),
 				),
 			),
+
 			tap((roles) =>
 				this.logger.verbose(style.bGreen.apply(`Fetched ${roles.size} roles.`)),
 			),
@@ -73,17 +70,19 @@ export class RolesGatewayService extends GatewayService {
 					style.bYellow.apply(`Finding role by name "${name}"...`),
 				),
 			),
+
 			switchMap((roles) =>
 				findInCollectionOrThrow(
 					roles,
 					(role) => role.name === name,
 					() =>
-						new Exception({
-							code: HttpStatus.NOT_FOUND,
-							message: `Role with name "${name}" not found.`,
-						}),
+						new Exception(
+							Status.NOT_FOUND_ERROR,
+							`Role with name "${name}" not found.`,
+						),
 				),
 			),
+
 			tap((role) =>
 				this.logger.verbose(
 					style.bGreen.apply(`Found role "${role.name}" (${role.id}).`),
@@ -99,17 +98,19 @@ export class RolesGatewayService extends GatewayService {
 					style.bYellow.apply(`Finding role by ID "${id}"...`),
 				),
 			),
+
 			switchMap((roles) =>
 				findInCollectionOrThrow(
 					roles,
 					(role) => role.id === id,
 					() =>
-						new Exception({
-							code: HttpStatus.NOT_FOUND,
-							message: `Role with ID "${id}" not found.`,
-						}),
+						new Exception(
+							Status.NOT_FOUND_ERROR,
+							`Role with ID "${id}" not found.`,
+						),
 				),
 			),
+
 			tap((role) =>
 				this.logger.verbose(
 					style.bGreen.apply(`Found role "${role.name}" (${role.id}).`),

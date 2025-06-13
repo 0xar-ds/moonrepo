@@ -1,34 +1,34 @@
 import {
-	GuildMember,
-	VoiceChannel,
-	MessageCreateOptions,
-	TextDisplayBuilder,
-	ContainerBuilder,
 	ActionRowBuilder,
 	ButtonBuilder,
-	formatEmoji,
-	spoiler,
-	userMention,
-	SeparatorSpacingSize,
-	MessageFlags,
-	StringSelectMenuBuilder,
-	InteractionEditReplyOptions,
-	subtext,
 	ButtonStyle,
+	ContainerBuilder,
+	formatEmoji,
+	GuildMember,
+	InteractionEditReplyOptions,
 	MediaGalleryBuilder,
+	MessageCreateOptions,
+	MessageFlags,
 	SeparatorBuilder,
+	SeparatorSpacingSize,
+	spoiler,
+	StringSelectMenuBuilder,
+	subtext,
+	TextDisplayBuilder,
+	userMention,
+	VoiceChannel,
 } from 'discord.js';
 
 import { formatComponentEmojiResolvable } from '#lib/emoji.js';
 
+import { Components } from './components.js';
+
 import {
-	CustomizationKind,
-	CustomizationSchemaMap,
 	CustomizationChoices,
 	CustomizationDefinition,
-} from '#lib/customization/index.js';
-
-import { Components } from './components.js';
+	CustomizationKind,
+	SchemaFor,
+} from '../customization/index.js';
 
 export const Messages = {
 	Onboarding: {
@@ -72,12 +72,11 @@ export const Messages = {
 
 			components.push(header, container);
 
-			if (activeVoiceChannel)
-				components.push(
-					row.addComponents(
-						Components.Buttons.VoiceChannel.JoinSome(activeVoiceChannel.url),
-					),
-				);
+			components.push(
+				row.addComponents(
+					Components.Buttons.VoiceChannel.JoinSome(activeVoiceChannel.url),
+				),
+			);
 
 			return {
 				components: components,
@@ -89,7 +88,7 @@ export const Messages = {
 	Customization: {
 		InterfaceMessage: <T extends CustomizationKind>(
 			kind: T,
-			config: CustomizationSchemaMap[T],
+			config: SchemaFor<T>,
 		): MessageCreateOptions => {
 			const components: Mutable<MessageCreateOptions['components']> = [];
 
@@ -105,13 +104,9 @@ export const Messages = {
 
 			const container = new ContainerBuilder();
 
-			let banner: string;
-
 			switch (kind) {
 				case CustomizationKind.Notification: {
 					components.push(gallery, row);
-
-					banner = config.panel_banner;
 
 					menu.setMinValues(0);
 					menu.setMaxValues(config.choices.size);
@@ -122,8 +117,6 @@ export const Messages = {
 				}
 				case CustomizationKind.Country: {
 					components.push(gallery, row);
-
-					banner = config.panel_banner;
 
 					menu.setMinValues(1);
 					menu.setMaxValues(1);
@@ -139,8 +132,6 @@ export const Messages = {
 				case CustomizationKind.Gender: {
 					components.push(gallery, row);
 
-					banner = config.panel_banner;
-
 					menu.setMinValues(1);
 					menu.setMaxValues(1);
 
@@ -155,13 +146,11 @@ export const Messages = {
 				case CustomizationKind.Color: {
 					components.push(container, row);
 
-					banner = config.panel_banner;
-
 					container.addMediaGalleryComponents(gallery);
 					container.addSeparatorComponents(separator);
 
 					for (const [index, display] of (
-						config as CustomizationSchemaMap[CustomizationKind.Color]
+						config as SchemaFor<CustomizationKind.Color>
 					).panel_options_banners.entries()) {
 						container.addMediaGalleryComponents((gallery) =>
 							gallery.addItems((picture) => picture.setURL(display)),
@@ -169,7 +158,7 @@ export const Messages = {
 
 						if (
 							index !==
-							(config as CustomizationSchemaMap[CustomizationKind.Color])
+							(config as SchemaFor<CustomizationKind.Color>)
 								.panel_options_banners.length -
 								1
 						)
@@ -193,7 +182,7 @@ export const Messages = {
 				}
 			}
 
-			gallery.addItems((picture) => picture.setURL(banner));
+			gallery.addItems((picture) => picture.setURL(config.panel_banner));
 
 			row.addComponents(menu);
 

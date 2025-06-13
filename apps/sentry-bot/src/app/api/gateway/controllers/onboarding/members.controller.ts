@@ -1,12 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { OgmaLogger, OgmaService } from '@ogma/nestjs-module';
 import { ClientEvents, GuildMember } from 'discord.js';
 import { Context, On } from 'necord';
 
-import { Exception } from '#lib/exception.js';
+import { Exception } from '@~shared/exceptions';
 
 import {
-	ChannelsGatewayService,
 	OnboardingDecisionService,
 	OnboardingNotificationService,
 } from '#services/index.js';
@@ -16,10 +15,11 @@ export class OnboardingController {
 	constructor(
 		@OgmaLogger(OnboardingController) private readonly logger: OgmaService,
 
+		@Inject(OnboardingDecisionService)
 		private readonly decisions: OnboardingDecisionService,
-		private readonly notifications: OnboardingNotificationService,
 
-		private readonly gChannels: ChannelsGatewayService,
+		@Inject(OnboardingNotificationService)
+		private readonly notifications: OnboardingNotificationService,
 	) {}
 
 	@On('messageCreate')
@@ -41,7 +41,11 @@ export class OnboardingController {
 				voiceChannel,
 			));
 		} catch (e) {
-			if (e instanceof Exception) return void this.logger.info(e.message);
+			if (e instanceof Exception) {
+				this.logger.info(e.message);
+
+				throw e;
+			}
 
 			this.logger.error(e);
 

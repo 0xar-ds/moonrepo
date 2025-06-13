@@ -15,15 +15,11 @@ import {
 	StringSelect,
 } from 'necord';
 
+import { Exception } from '@~shared/exceptions';
+
 import { CustomizationFeatureSchema } from '#config/schema/features/index.js';
 import { DeferReplyGuard } from '#guards/defer-reply.guard.js';
-
-import {
-	CustomizationKind,
-	CustomizationKindToSelectionType,
-} from '#lib/customization/index.js';
-
-import { Exception } from '#lib/exception.js';
+import { CustomizationKind } from '#lib/customization/index.js';
 import { convertMessageCreateOptionsToInteractionEditReplyOptions } from '#lib/message.js';
 import { Messages } from '#lib/ui/messages.js';
 
@@ -33,6 +29,12 @@ import {
 	GenderCustomizationService,
 	NotificationCustomizationService,
 } from '#services/index.js';
+
+import type {
+	SchemaFor,
+	SelectionFor,
+	ServiceFor,
+} from '#lib/customization/index.js';
 
 @Injectable()
 export class CustomizationController {
@@ -48,167 +50,34 @@ export class CustomizationController {
 		private readonly config: CustomizationFeatureSchema,
 	) {}
 
-	@StringSelect('customization/color')
+	@StringSelect('customization/:type')
 	@UseGuards(DeferReplyGuard)
-	public async onColorSelect<T extends CustomizationKind.Color>(
+	public async onCustomizationSelect<T extends CustomizationKind>(
+		@ComponentParam('type') kind: CustomizationKind,
 		@Context() [interaction]: [StringSelectMenuInteraction],
-		@SelectedStrings() selection: CustomizationKindToSelectionType[T],
+		@SelectedStrings() selection: SelectionFor<T>,
 	) {
 		if (!selection || !(interaction?.member instanceof GuildMember))
 			return void (await interaction
 				.editReply({ content: 'Interaction not-acceptable.' })
 				.catch());
 
-		const choices = this.colors.getChoicesSchema(),
-			selections = this.colors.getChoicesForSelection(
-				interaction.member,
-				selection,
-				choices,
-			);
+		const service = this.getServiceByCustomizationRequestKind(kind);
+
+		const choices = service.getChoicesSchema();
+
+		const selections = service.getChoicesForSelection(
+			interaction.member,
+			selection,
+			/** @ts-expect-error: typescript is dumb and doesnt properly narrow the union */
+			choices,
+		);
 
 		try {
 			if (selection[0] === 'CLEAR_OPTIONS') {
-				await this.colors.deselectChoices(interaction.member, selections);
-
-				return void (await interaction.editReply(
-					Messages.Customization.Actions.Deselected(selections),
-				));
-			}
-
-			await this.colors.spliceChoices(interaction.member, selections, choices);
-
-			return void (await interaction.editReply(
-				Messages.Customization.Actions.Selected(selections),
-			));
-		} catch (e) {
-			if (e instanceof Exception) {
-				this.logger.info(e.message);
-
-				throw e;
-			}
-
-			return void (await interaction
-				.editReply({ content: 'Internal server error.' })
-				.catch());
-		}
-	}
-
-	@StringSelect('customization/gender')
-	@UseGuards(DeferReplyGuard)
-	public async onGenderSelect<T extends CustomizationKind.Gender>(
-		@Context() [interaction]: [StringSelectMenuInteraction],
-		@SelectedStrings() selection: CustomizationKindToSelectionType[T],
-	) {
-		if (!selection || !(interaction?.member instanceof GuildMember))
-			return void (await interaction
-				.editReply({ content: 'Interaction not-acceptable.' })
-				.catch());
-
-		const choices = this.genders.getChoicesSchema(),
-			selections = this.genders.getChoicesForSelection(
-				interaction.member,
-				selection,
-				choices,
-			);
-
-		try {
-			if (selection[0] === 'CLEAR_OPTIONS') {
-				await this.genders.deselectChoices(interaction.member, selections);
-
-				return void (await interaction.editReply(
-					Messages.Customization.Actions.Deselected(selections),
-				));
-			}
-
-			await this.genders.spliceChoices(interaction.member, selections, choices);
-
-			return void (await interaction.editReply(
-				Messages.Customization.Actions.Selected(selections),
-			));
-		} catch (e) {
-			if (e instanceof Exception) {
-				this.logger.info(e.message);
-
-				throw e;
-			}
-
-			return void (await interaction
-				.editReply({ content: 'Internal server error.' })
-				.catch());
-		}
-	}
-
-	@StringSelect('customization/country')
-	@UseGuards(DeferReplyGuard)
-	public async onCountrySelect<T extends CustomizationKind.Country>(
-		@Context() [interaction]: [StringSelectMenuInteraction],
-		@SelectedStrings() selection: CustomizationKindToSelectionType[T],
-	) {
-		if (!selection || !(interaction?.member instanceof GuildMember))
-			return void (await interaction
-				.editReply({ content: 'Interaction not-acceptable.' })
-				.catch());
-
-		const choices = this.countries.getChoicesSchema(),
-			selections = this.countries.getChoicesForSelection(
-				interaction.member,
-				selection,
-				choices,
-			);
-
-		try {
-			if (selection[0] === 'CLEAR_OPTIONS') {
-				await this.countries.deselectChoices(interaction.member, selections);
-
-				return void (await interaction.editReply(
-					Messages.Customization.Actions.Deselected(selections),
-				));
-			}
-
-			await this.countries.spliceChoices(
-				interaction.member,
-				selections,
-				choices,
-			);
-
-			return void (await interaction.editReply(
-				Messages.Customization.Actions.Selected(selections),
-			));
-		} catch (e) {
-			if (e instanceof Exception) {
-				this.logger.info(e.message);
-
-				throw e;
-			}
-
-			return void (await interaction
-				.editReply({ content: 'Internal server error.' })
-				.catch());
-		}
-	}
-
-	@StringSelect('customization/notifications')
-	@UseGuards(DeferReplyGuard)
-	public async onNotificationsSelect<T extends CustomizationKind.Notification>(
-		@Context() [interaction]: [StringSelectMenuInteraction],
-		@SelectedStrings() selection: CustomizationKindToSelectionType[T],
-	) {
-		if (!selection || !(interaction?.member instanceof GuildMember))
-			return void (await interaction
-				.editReply({ content: 'Interaction not-acceptable.' })
-				.catch());
-
-		const choices = this.notifications.getChoicesSchema(),
-			selections = this.notifications.getChoicesForSelection(
-				interaction.member,
-				selection,
-				choices,
-			);
-
-		try {
-			if (selection.length === 0 || selection[0] === 'CLEAR_OPTIONS') {
-				await this.notifications.deselectChoices(
+				await service.deselectChoices(
 					interaction.member,
+					/** @ts-expect-error: typescript is dumb and doesnt properly narrow the union */
 					selections,
 				);
 
@@ -217,8 +86,9 @@ export class CustomizationController {
 				));
 			}
 
-			await this.notifications.spliceChoices(
+			await service.spliceChoices(
 				interaction.member,
+				/** @ts-expect-error: typescript is dumb and doesnt properly narrow the union */
 				selections,
 				choices,
 			);
@@ -269,14 +139,27 @@ export class CustomizationController {
 
 	private getSchemaByCustomizationRequestKind<T extends CustomizationKind>(
 		kind: T,
-	) {
-		return (
-			{
-				[CustomizationKind.Color]: this.config.colors,
-				[CustomizationKind.Gender]: this.config.genders,
-				[CustomizationKind.Country]: this.config.countries,
-				[CustomizationKind.Notification]: this.config.notifications,
-			} as const
-		)[kind];
+	): SchemaFor<T> {
+		const map = {
+			[CustomizationKind.Color]: this.config.colors,
+			[CustomizationKind.Gender]: this.config.genders,
+			[CustomizationKind.Country]: this.config.countries,
+			[CustomizationKind.Notification]: this.config.notifications,
+		} as const;
+
+		return map[kind] as unknown as SchemaFor<T>;
+	}
+
+	private getServiceByCustomizationRequestKind<T extends CustomizationKind>(
+		kind: T,
+	): ServiceFor<T> {
+		const map = {
+			[CustomizationKind.Color]: this.colors,
+			[CustomizationKind.Gender]: this.genders,
+			[CustomizationKind.Country]: this.countries,
+			[CustomizationKind.Notification]: this.notifications,
+		} as const;
+
+		return map[kind] as unknown as ServiceFor<T>;
 	}
 }

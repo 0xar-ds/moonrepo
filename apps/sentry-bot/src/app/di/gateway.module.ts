@@ -7,6 +7,7 @@ import { NecordModule, NecordModuleOptions } from 'necord';
 import { ServerConfigSchema } from '#config/server-config.schema.js';
 import { CustomizationController } from '#controllers/customization/customization.controller.js';
 import { SetupCustomizationFeaturesController } from '#controllers/customization/setup-customization-interfaces.controller.js';
+import { EndorsementController } from '#controllers/endorsement/endorsement.controller.js';
 import { OnboardingController } from '#controllers/onboarding/members.controller.js';
 import { DiscordExceptionFilter } from '#exception-filters/necord.exception-filter.js';
 
@@ -22,20 +23,30 @@ import {
 	RolesGatewayService,
 } from '#services/index.js';
 
-const PROVIDERS = [
+const GATEWAY = [
 	GuildGatewayService,
 	RolesGatewayService,
 	ChannelsGatewayService,
-	OnboardingDecisionService,
-	OnboardingNotificationService,
-	OnboardingController,
-	SetupCustomizationFeaturesController,
+
+	EndorsementController,
+];
+
+const CUSTOMIZATION = [
 	ColorCustomizationService,
 	CountryCustomizationService,
 	GenderCustomizationService,
 	NotificationCustomizationService,
+	SetupCustomizationFeaturesController,
 	CustomizationController,
 ];
+
+const ONBOARDING = [
+	OnboardingDecisionService,
+	OnboardingNotificationService,
+	OnboardingController,
+];
+
+const PROVIDERS = [...GATEWAY, ...CUSTOMIZATION, ...ONBOARDING];
 
 @Module({
 	imports: [
@@ -58,6 +69,7 @@ export class GatewayModule {
 				IntentsBitField.Flags.Guilds,
 				IntentsBitField.Flags.GuildMembers,
 				IntentsBitField.Flags.GuildMessages,
+				IntentsBitField.Flags.GuildPresences,
 			],
 			token: this.config.application.token,
 			development: [this.config.application.guild],

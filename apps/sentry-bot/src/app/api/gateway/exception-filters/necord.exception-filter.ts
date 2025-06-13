@@ -1,22 +1,27 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
+import { CommandInteraction, MessageComponentInteraction } from 'discord.js';
 import { NecordArgumentsHost } from 'necord';
 
-import { Exception } from '#lib/exception.js';
+import { Exception } from '@~shared/exceptions';
 
 @Catch(Exception)
 export class DiscordExceptionFilter implements ExceptionFilter {
-	catch(exception: Exception, host: ArgumentsHost) {
+	catch(exception: Exception<unknown>, host: ArgumentsHost) {
 		try {
 			const necord = NecordArgumentsHost.create(host);
 
-			const [interaction] = necord.getContext<'interactionCreate'>();
+			const [event] = necord.getContext();
 
-			if (interaction.isRepliable() && interaction.replied)
-				interaction
+			if (
+				event instanceof MessageComponentInteraction ||
+				event instanceof CommandInteraction
+			) {
+				event
 					.editReply({
 						content: `${exception.code}: ${exception.message}`,
 					})
 					.catch();
+			}
 
 			return true;
 		} catch {
