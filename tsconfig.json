@@ -19,10 +19,28 @@
       "path": "libs/server/config/schemas"
     },
     {
+      "path": "libs/server/core/api"
+    },
+    {
       "path": "libs/server/discord/bridged-logging"
     },
     {
       "path": "libs/server/discord/lookaheads"
+    },
+    {
+      "path": "libs/server/discord/modules/bridged-logging"
+    },
+    {
+      "path": "libs/server/discord/modules/lookaheads"
+    },
+    {
+      "path": "libs/shared/exceptions"
+    },
+    {
+      "path": "libs/shared/rxjs/observables/shared-replay"
+    },
+    {
+      "path": "libs/shared/status"
     }
   ]
 }
