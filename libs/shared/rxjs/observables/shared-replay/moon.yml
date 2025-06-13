@@ -1,0 +1,12 @@
+type: library
+language: typescript
+stack: unknown
+tags:
+  - 'tsc'
+  - 'eslint'
+  - 'prettier'
+  - 'code-quality'
+
+project:
+  name: 'libs/shared/rxjs/observables/shared-replay'
+  description: 'Utility to manage an Rxjs Observable that buffers in a shared replay operator.'
