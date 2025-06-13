@@ -26,7 +26,7 @@
 	"dependencies": {
 		"rxjs": "^7.8.2",
 		"reflect-metadata": "^0.2.2",
-    "@~shared/status": "workspace:^",
-    "@~shared/exceptions": "workspace:^"
+		"@~shared/status": "workspace:^",
+		"@~shared/exceptions": "workspace:^"
 	}
 }

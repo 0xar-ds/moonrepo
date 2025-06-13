@@ -24,7 +24,7 @@
 		}
 	},
 	"dependencies": {
-    "@~shared/status": "workspace:^",
+		"@~shared/status": "workspace:^",
 		"@nestjs/common": "^11.1.1",
 		"reflect-metadata": "^0.2.2"
 	}
