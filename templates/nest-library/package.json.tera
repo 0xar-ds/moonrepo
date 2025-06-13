@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"devDependencies": {
-		"@meta/eslint": "workspace:^",
+		"@~meta/eslint": "workspace:^",
 		"@nestjs/cli": "^11.0.6",
 		"@nestjs/schematics": "^11.0.5",
 		"@nestjs/testing": "^11.0.20",
