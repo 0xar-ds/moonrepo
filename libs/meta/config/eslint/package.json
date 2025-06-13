@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/base.eslint-config.js",
-    "./svelte": "./src/svelte.eslint-config.js",
+    ".": {
+      "default": "./src/base.eslint-config.js",
+      "types": "./src/base.eslint-config.d.ts"
+    },
+    "./svelte": {
+      "default": "./src/svelte.eslint-config.js",
+      "types": "./src/svelte.eslint-config.d.ts"
+    },
     "./utils": {
       "default": "./src/utils/utils.js",
       "types": "./src/utils/utils.d.ts"
