@@ -4,8 +4,10 @@ declare global {
 	};
 
 	type Prettify<T> = {
-		[K in keyof T]: T[K];
+		[P in keyof T]: T[P];
 	} & {};
+
+	type Nullable<T> = T | null;
 }
 
 export {};
