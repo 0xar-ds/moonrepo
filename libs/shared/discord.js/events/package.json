@@ -1,0 +1,29 @@
+{
+	"name": "@~discord.js/events",
+	"version": "0.0.1",
+	"type": "module",
+	"devDependencies": {
+		"@~meta/eslint": "workspace:^",
+		"@types/express": "^5.0.1",
+		"@types/node": "^22.14.1",
+		"globals": "^16.0.0",
+		"source-map-support": "^0.5.21",
+		"ts-loader": "^9.5.2",
+		"ts-node": "^10.9.2",
+		"tsconfig-paths": "^4.2.0"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/src/index.d.ts",
+			"default": "./dist/src/index.js"
+		},
+		"./*": {
+			"types": "./dist/src/*.d.ts",
+			"default": "./dist/src/*.js"
+		}
+	},
+	"dependencies": {
+		"discord.js": "catalog:discord",
+		"reflect-metadata": "^0.2.2"
+	}
+}

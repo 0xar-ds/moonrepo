@@ -1,0 +1,13 @@
+id: 'shared.discord.js-events'
+type: library
+language: typescript
+stack: unknown
+tags:
+  - 'tsc'
+  - 'eslint'
+  - 'prettier'
+  - 'code-quality'
+
+project:
+  name: 'libs/shared/discord.js/events'
+  description: 'Utilities around Discord.js struct of events'
