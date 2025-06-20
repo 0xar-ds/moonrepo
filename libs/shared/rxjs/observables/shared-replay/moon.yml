@@ -1,3 +1,4 @@
+id: 'shared.rxjs-shared-replay'
 type: library
 language: typescript
 stack: unknown

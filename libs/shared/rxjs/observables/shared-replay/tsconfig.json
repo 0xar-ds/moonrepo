@@ -11,7 +11,7 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true
 	},
-	"include": ["../../../../../types/**/*", "../../../../types/**/*"],
+	"include": ["../../../../../types/**/*"],
 	"references": [
 		{
 			"path": "./tsconfig.build.json"
