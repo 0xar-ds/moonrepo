@@ -1,1 +1,1 @@
-export * from './lib/app-status.js';
+export * from './app-status.js';
