@@ -1,0 +1,13 @@
+id: 'shared.discord.js-channels'
+type: library
+language: typescript
+stack: unknown
+tags:
+  - 'tsc'
+  - 'eslint'
+  - 'prettier'
+  - 'code-quality'
+
+project:
+  name: 'libs/shared/discord.js/channels'
+  description: 'Utilities around Discord.js structs of channels'
