@@ -1,3 +1,4 @@
+id: 'shared.status'
 type: library
 language: typescript
 stack: unknown
