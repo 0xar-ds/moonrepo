@@ -8,6 +8,8 @@ declare global {
 	} & {};
 
 	type Nullable<T> = T | null;
+
+	type MaybePromise<T> = Promise<T> | T;
 }
 
 export {};
