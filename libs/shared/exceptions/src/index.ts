@@ -1,1 +1,1 @@
-export * from './lib/exception.js';
+export * from './exception.js';
